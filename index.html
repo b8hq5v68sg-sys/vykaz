@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pracovní výkaz</title>
 
-  <!-- PDF knihovna -->
+  <!-- jsPDF (funguje v Safari) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
@@ -71,18 +71,18 @@
 <div class="card">
   <label>Měsíc</label>
   <select id="month">
-    <option value="01">Leden</option>
-    <option value="02">Únor</option>
-    <option value="03">Březen</option>
-    <option value="04">Duben</option>
-    <option value="05">Květen</option>
-    <option value="06">Červen</option>
-    <option value="07">Červenec</option>
-    <option value="08">Srpen</option>
-    <option value="09">Září</option>
-    <option value="10">Říjen</option>
-    <option value="11">Listopad</option>
-    <option value="12">Prosinec</option>
+    <option>Leden</option>
+    <option>Únor</option>
+    <option>Březen</option>
+    <option>Duben</option>
+    <option>Květen</option>
+    <option>Červen</option>
+    <option>Červenec</option>
+    <option>Srpen</option>
+    <option>Září</option>
+    <option>Říjen</option>
+    <option>Listopad</option>
+    <option>Prosinec</option>
   </select>
 
   <label>Datum</label>
@@ -101,7 +101,7 @@
 </div>
 
 <div class="card">
-  <button onclick="exportPDF()">Vygenerovat PDF za měsíc</button>
+  <button onclick="exportPDF()">Vygenerovat PDF</button>
 </div>
 
 <div class="card">
@@ -180,7 +180,7 @@ function addRow() {
 
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
-  const hours = ((eh*60 + em) - (sh*60 + sm)) / 60;
+  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 
   const work = Math.round(hours * RATE);
   const kmPay = Math.round(km * KM_RATE);
@@ -196,12 +196,16 @@ function addRow() {
 }
 
 function exportPDF() {
-  const { jsPDF } = window.jspdf;
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) {
+    alert("PDF knihovna se nenačetla");
+    return;
+  }
+
   const doc = new jsPDF();
+  const month = document.getElementById("month").value;
 
-  const monthName = document.getElementById("month").selectedOptions[0].text;
-
-  doc.text("Pracovní výkaz – " + monthName, 10, 10);
+  doc.text("Pracovní výkaz – " + month, 10, 10);
 
   let y = 20;
   data.forEach(r => {
