@@ -3,224 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pracovní výkaz</title>
-
-  <!-- jsPDF (funguje v Safari) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+  <title>Test</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f5f5f5;
-      margin: 0;
-      padding: 16px;
+      padding: 20px;
     }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-    .card {
-      background: #fff;
+    .box {
+      background: white;
+      padding: 20px;
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    }
-    label {
-      font-size: 14px;
-      display: block;
-      margin-top: 8px;
-    }
-    input, select {
-      width: 100%;
-      font-size: 16px;
-      padding: 8px;
-      margin-top: 4px;
-    }
-    button {
-      margin-top: 12px;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background: #007aff;
-      color: #fff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 6px;
-      text-align: center;
-    }
-    tfoot td {
-      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
     }
   </style>
 </head>
-
 <body>
-
-<h1>Pracovní výkaz</h1>
-
-<div class="card">
-  <label>Měsíc</label>
-  <select id="month">
-    <option>Leden</option>
-    <option>Únor</option>
-    <option>Březen</option>
-    <option>Duben</option>
-    <option>Květen</option>
-    <option>Červen</option>
-    <option>Červenec</option>
-    <option>Srpen</option>
-    <option>Září</option>
-    <option>Říjen</option>
-    <option>Listopad</option>
-    <option>Prosinec</option>
-  </select>
-
-  <label>Datum</label>
-  <input type="date" id="date">
-
-  <label>Nástup</label>
-  <input type="time" id="start">
-
-  <label>Konec</label>
-  <input type="time" id="end">
-
-  <label>Kilometry</label>
-  <input type="number" id="km">
-
-  <button onclick="addRow()">Uložit záznam</button>
-</div>
-
-<div class="card">
-  <button onclick="exportPDF()">Vygenerovat PDF</button>
-</div>
-
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Hodiny</th>
-        <th>Km</th>
-        <th>Kč práce</th>
-        <th>Kč km</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-    <tfoot>
-      <tr>
-        <td>CELKEM</td>
-        <td id="th">0</td>
-        <td id="tkm">0</td>
-        <td id="tp">0</td>
-        <td id="tpk">0</td>
-      </tr>
-    </tfoot>
-  </table>
-</div>
-
-<script>
-const RATE = 400;
-const KM_RATE = 11;
-
-let data = JSON.parse(localStorage.getItem("vykazData") || "[]");
-
-function save() {
-  localStorage.setItem("vykazData", JSON.stringify(data));
-}
-
-function render() {
-  const tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
-
-  let th = 0, tkm = 0, tp = 0, tpk = 0;
-
-  data.forEach(r => {
-    th += r.hours;
-    tkm += r.km;
-    tp += r.work;
-    tpk += r.kmPay;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.date}</td>
-      <td>${r.hours.toFixed(2)}</td>
-      <td>${r.km}</td>
-      <td>${r.work}</td>
-      <td>${r.kmPay}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById("th").textContent = th.toFixed(2);
-  document.getElementById("tkm").textContent = tkm;
-  document.getElementById("tp").textContent = tp;
-  document.getElementById("tpk").textContent = tpk;
-}
-
-function addRow() {
-  const date = document.getElementById("date").value;
-  const start = document.getElementById("start").value;
-  const end = document.getElementById("end").value;
-  const km = Number(document.getElementById("km").value || 0);
-
-  if (!date || !start || !end) {
-    alert("Vyplň datum, nástup a konec");
-    return;
-  }
-
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
-  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
-
-  const work = Math.round(hours * RATE);
-  const kmPay = Math.round(km * KM_RATE);
-
-  data.push({ date, hours, km, work, kmPay });
-  save();
-  render();
-
-  document.getElementById("date").value = "";
-  document.getElementById("start").value = "";
-  document.getElementById("end").value = "";
-  document.getElementById("km").value = "";
-}
-
-function exportPDF() {
-  const jsPDF = window.jspdf?.jsPDF;
-  if (!jsPDF) {
-    alert("PDF knihovna se nenačetla");
-    return;
-  }
-
-  const doc = new jsPDF();
-  const month = document.getElementById("month").value;
-
-  doc.text("Pracovní výkaz – " + month, 10, 10);
-
-  let y = 20;
-  data.forEach(r => {
-    doc.text(`${r.date} | ${r.hours.toFixed(2)} h | ${r.km} km | ${r.work + r.kmPay} Kč`, 10, y);
-    y += 8;
-  });
-
-  const total = data.reduce((s, r) => s + r.work + r.kmPay, 0);
-  doc.text("CELKEM: " + total + " Kč", 10, y + 10);
-
-  doc.save("vykaz.pdf");
-}
-
-render();
-</script>
-
+  <div class="box">
+    <h1>TEST OK</h1>
+    <p>Pokud tohle vidíš, GitHub Pages fungují správně.</p>
+  </div>
 </body>
 </html>
