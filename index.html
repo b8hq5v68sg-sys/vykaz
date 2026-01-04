@@ -1,57 +1,24 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pracovní výkaz</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pracovní výkaz</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 16px;
-    }
-    h1 { font-size: 20px; margin-bottom: 12px; }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    }
-    label { font-size: 14px; display: block; margin-top: 8px; }
-    input, select {
-      width: 100%;
-      font-size: 16px;
-      padding: 8px;
-      margin-top: 4px;
-    }
-    button {
-      margin-top: 12px;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background: #007aff;
-      color: white;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 6px;
-      text-align: center;
-    }
-    tfoot td { font-weight: bold; }
-  </style>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;margin:0;padding:16px}
+h1{font-size:20px;margin-bottom:12px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+label{font-size:14px;display:block;margin-top:8px}
+input,select{width:100%;font-size:16px;padding:8px;margin-top:4px}
+button{margin-top:12px;width:100%;padding:12px;font-size:16px;border:none;border-radius:10px;background:#007aff;color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center}
+tfoot td{font-weight:bold}
+tr{cursor:pointer}
+</style>
 </head>
 
 <body>
@@ -59,156 +26,133 @@
 <h1>Pracovní výkaz</h1>
 
 <div class="card">
-  <label>Měsíc</label>
-  <select id="month">
-    <option>Leden</option><option>Únor</option><option>Březen</option>
-    <option>Duben</option><option>Květen</option><option>Červen</option>
-    <option>Červenec</option><option>Srpen</option><option>Září</option>
-    <option>Říjen</option><option>Listopad</option><option>Prosinec</option>
-  </select>
+<label>Měsíc</label>
+<select id="month" onchange="render()">
+<option value="0">Leden</option><option value="1">Únor</option><option value="2">Březen</option>
+<option value="3">Duben</option><option value="4">Květen</option><option value="5">Červen</option>
+<option value="6">Červenec</option><option value="7">Srpen</option><option value="8">Září</option>
+<option value="9">Říjen</option><option value="10">Listopad</option><option value="11">Prosinec</option>
+</select>
 
-  <label>Datum</label>
-  <input type="date" id="date">
+<label>Datum</label>
+<input type="date" id="date">
 
-  <label>Nástup</label>
-  <input type="time" id="start">
+<label>Nástup</label>
+<input type="time" id="start">
 
-  <label>Konec</label>
-  <input type="time" id="end">
+<label>Konec</label>
+<input type="time" id="end">
 
-  <label>Kilometry</label>
-  <input type="number" id="km">
+<label>Kilometry</label>
+<input type="number" id="km">
 
-  <button onclick="addRow()">Uložit záznam</button>
+<button onclick="saveRow()">Uložit záznam</button>
 </div>
 
 <div class="card">
-  <button onclick="exportPDF()">Vygenerovat PDF</button>
+<button onclick="exportPDF()">Vygenerovat PDF (vybraný měsíc)</button>
 </div>
 
 <div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Hodiny</th>
-        <th>Km</th>
-        <th>Kč práce</th>
-        <th>Kč km</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-    <tfoot>
-      <tr>
-        <td>CELKEM</td>
-        <td id="th">0</td>
-        <td id="tkm">0</td>
-        <td id="tp">0</td>
-        <td id="tpk">0</td>
-      </tr>
-    </tfoot>
-  </table>
+<table>
+<thead>
+<tr>
+<th>Datum</th><th>Hodiny</th><th>Km</th><th>Kč práce</th><th>Kč km</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+<tfoot>
+<tr>
+<td>CELKEM</td>
+<td id="th">0</td>
+<td id="tkm">0</td>
+<td id="tp">0</td>
+<td id="tpk">0</td>
+</tr>
+</tfoot>
+</table>
 </div>
 
 <script>
-var RATE = 400;
-var KM_RATE = 11;
+var RATE=400,KM_RATE=11;
+var data=JSON.parse(localStorage.getItem("vykazData")||"[]");
+var editIndex=null;
 
-var data = JSON.parse(localStorage.getItem("vykazData") || "[]");
+function saveData(){localStorage.setItem("vykazData",JSON.stringify(data))}
 
-function save() {
-  localStorage.setItem("vykazData", JSON.stringify(data));
+function render(){
+var m=document.getElementById("month").value;
+var tbody=document.getElementById("rows");
+tbody.innerHTML="";
+var th=0,tkm=0,tp=0,tpk=0;
+
+for(var i=0;i<data.length;i++){
+var r=data[i];
+var d=new Date(r.date);
+if(d.getMonth()!=m)continue;
+
+th+=r.hours;tkm+=r.km;tp+=r.work;tpk+=r.kmPay;
+
+var tr=document.createElement("tr");
+tr.innerHTML="<td>"+r.date+"</td><td>"+r.hours.toFixed(2)+"</td><td>"+r.km+"</td><td>"+r.work+"</td><td>"+r.kmPay+"</td>";
+tr.oncontextmenu=(function(i){return function(e){e.preventDefault();editRow(i)}})(i);
+tr.ontouchstart=(function(i){return function(){this.t=setTimeout(function(){editRow(i)},600)}})(i);
+tr.ontouchend=function(){clearTimeout(this.t)};
+tbody.appendChild(tr);
 }
 
-function render() {
-  var tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
-
-  var th = 0, tkm = 0, tp = 0, tpk = 0;
-
-  for (var i = 0; i < data.length; i++) {
-    var r = data[i];
-    th += r.hours;
-    tkm += r.km;
-    tp += r.work;
-    tpk += r.kmPay;
-
-    var tr = document.createElement("tr");
-    tr.innerHTML =
-      "<td>" + r.date + "</td>" +
-      "<td>" + r.hours.toFixed(2) + "</td>" +
-      "<td>" + r.km + "</td>" +
-      "<td>" + r.work + "</td>" +
-      "<td>" + r.kmPay + "</td>";
-    tbody.appendChild(tr);
-  }
-
-  document.getElementById("th").textContent = th.toFixed(2);
-  document.getElementById("tkm").textContent = tkm;
-  document.getElementById("tp").textContent = tp;
-  document.getElementById("tpk").textContent = tpk;
+document.getElementById("th").textContent=th.toFixed(2);
+document.getElementById("tkm").textContent=tkm;
+document.getElementById("tp").textContent=tp;
+document.getElementById("tpk").textContent=tpk;
 }
 
-function addRow() {
-  var date = document.getElementById("date").value;
-  var start = document.getElementById("start").value;
-  var end = document.getElementById("end").value;
-  var km = Number(document.getElementById("km").value || 0);
+function saveRow(){
+var date=document.getElementById("date").value;
+var start=document.getElementById("start").value;
+var end=document.getElementById("end").value;
+var km=Number(document.getElementById("km").value||0);
+if(!date||!start||!end){alert("Vyplň vše");return}
 
-  if (!date || !start || !end) {
-    alert("Vyplň datum, nástup a konec");
-    return;
-  }
+var sh=+start.split(":")[0],sm=+start.split(":")[1];
+var eh=+end.split(":")[0],em=+end.split(":")[1];
+var hours=((eh*60+em)-(sh*60+sm))/60;
 
-  var sh = Number(start.split(":")[0]);
-  var sm = Number(start.split(":")[1]);
-  var eh = Number(end.split(":")[0]);
-  var em = Number(end.split(":")[1]);
+var row={date:date,hours:hours,km:km,work:Math.round(hours*RATE),kmPay:Math.round(km*KM_RATE)};
 
-  var hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+if(editIndex!==null){data.splice(editIndex,0,row);editIndex=null}else data.push(row);
 
-  var work = Math.round(hours * RATE);
-  var kmPay = Math.round(km * KM_RATE);
-
-  data.push({ date: date, hours: hours, km: km, work: work, kmPay: kmPay });
-  save();
-  render();
-
-  document.getElementById("date").value = "";
-  document.getElementById("start").value = "";
-  document.getElementById("end").value = "";
-  document.getElementById("km").value = "";
+saveData();render();
+document.getElementById("date").value="";
+document.getElementById("start").value="";
+document.getElementById("end").value="";
+document.getElementById("km").value="";
 }
 
-function exportPDF() {
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("PDF nelze vytvořit");
-    return;
-  }
+function editRow(i){
+var r=data[i];
+data.splice(i,1);
+editIndex=i;
+saveData();
+document.getElementById("date").value=r.date;
+document.getElementById("km").value=r.km;
+render();
+}
 
-  var doc = new window.jspdf.jsPDF();
-  var month = document.getElementById("month").value;
-
-  doc.text("Pracovní výkaz – " + month, 10, 10);
-
-  var y = 20;
-  for (var i = 0; i < data.length; i++) {
-    var r = data[i];
-    doc.text(
-      r.date + " | " + r.hours.toFixed(2) + " h | " + r.km + " km | " + (r.work + r.kmPay) + " Kč",
-      10,
-      y
-    );
-    y += 8;
-  }
-
-  var total = 0;
-  for (var i = 0; i < data.length; i++) {
-    total += data[i].work + data[i].kmPay;
-  }
-
-  doc.text("CELKEM: " + total + " Kč", 10, y + 10);
-  doc.save("vykaz.pdf");
+function exportPDF(){
+if(!window.jspdf||!window.jspdf.jsPDF)return;
+var doc=new window.jspdf.jsPDF();
+var m=document.getElementById("month").selectedOptions[0].text;
+doc.text("Pracovní výkaz – "+m,10,10);
+var y=20,total=0;
+for(var i=0;i<data.length;i++){
+var r=data[i],d=new Date(r.date);
+if(d.getMonth()!=document.getElementById("month").value)continue;
+doc.text(r.date+" | "+r.hours.toFixed(2)+" h | "+r.km+" km | "+(r.work+r.kmPay)+" Kč",10,y);
+total+=r.work+r.kmPay;y+=8;
+}
+doc.text("CELKEM: "+total+" Kč",10,y+10);
+doc.save("vykaz_"+m+".pdf");
 }
 
 render();
